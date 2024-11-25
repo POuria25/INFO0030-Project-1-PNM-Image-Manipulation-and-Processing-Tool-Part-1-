@@ -1,23 +1,24 @@
 /**
  * pnm.h
  *
- * Ce fichier contient les déclarations de types et les prototypes
- * des fonctions pour la manipulation d'images PNM.
+ * This file contiens declaration of PNM structure and functions for 
+ * image manipulation. 
  *
- * @author: SALEHIKATOZI SeyedPouria S192865
+ * @author: KATOUZIAN Pouria S192865
  * @date: 10/02/2021
  * @projet: INFO0030 Projet 1
  */
 
-/*
- * Include guard (pour éviter les problèmes d'inclusions multiplies
- * Bonne pratique: toujours encadrer un header avec un include guard
- */
 #ifndef __PNM__
 #define __PNM__
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
 /**
- * Déclaration du type opaque PNM
+ * PNM_t structure for PNM images 
  *
  */
 typedef struct PNM_t PNM;
@@ -25,49 +26,49 @@ typedef struct PNM_t PNM;
 
 /**
  * load_pnm
- *
- * Charge une image PNM depuis un fichier.
- *
- * @param image l'adresse d'un pointeur sur PNM à laquelle écrire l'adresse
- *              de l'image chargée.
- * @param filename le chemin vers le fichier contenant l'image.
- *
+ * 
+ * Load an image from a file.
+ * 
+ * @param image a pointer to PNM.
+ * @param filename the path to the file.
+ * 
  * @pre: image != NULL, filename != NULL
- * @post: image pointe vers l'image chargée depuis le fichier.
- *
+ * @post: image contains the image from the file.
+ * 
  * @return:
- *     0 Succès
- *    -1 Erreur à l'allocation de mémoire
- *    -2 Nom du fichier malformé
- *    -3 Contenu du fichier malformé
- *
+ *    0 Success
+ *   -1 Malformed file name
  */
 int load_pnm(PNM **image, char* filename);
 
 /**
  * write_pnm
- *
- * Sauvegarde une image PNM dans un fichier.
- *
- * @param image un pointeur sur PNM.
- * @param filename le chemin vers le fichier de destination.
- *
+ * 
+ * Write an image to a file.
+ * 
+ * @param image a pointer to PNM.
+ * @param filename the path to the file.
+ * 
  * @pre: image != NULL, filename != NULL
- * @post: le fichier filename contient l'image PNM image.
- *
+ * @post: image is written to the file.
+ * 
  * @return:
- *     0 Succès
- *    -1 Nom du fichier malformé
- *    -2 Erreur lors de la manipulation du fichier
- *
+ *    0 Success
+ *   -2 Error Opening File
  */
 int write_pnm(PNM *image, char* filename);
 
 /**
- *
+ * free_pnm
+ * 
+ * Free the memory allocated for the image.
+ * 
+ * @param image a pointer to PNM.
+ * 
  * @pre: image != NULL
- * @post: free all memory allocated for program
- *
+ * @post: image is freed.
+ * 
+ * @return: -
  */
 void free_pnm(PNM *image);
 #endif // __PNM__

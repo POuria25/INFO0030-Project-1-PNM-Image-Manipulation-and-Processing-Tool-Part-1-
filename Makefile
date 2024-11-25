@@ -49,6 +49,11 @@ cppcheck:
 	cppcheck --enable=all --inconclusive --verbose --suppress=missingIncludeSystem -I. --output-file=cppcheck_report.txt $(SRC_FILES)
 	cppcheck --enable=style --inconclusive --verbose --suppress=missingIncludeSystem -I. --output-file=cppcheck_report.txt $(SRC_FILES)
 
+memory_sanitizer:
+	clang -fsanitize=memory -fno-omit-frame-pointer -g -o $(PROG) $(SRC_FILES) $(CFLAGS) $(LDFLAGS)
+
+tar:
+	tar -czvf S-192865.tar.gz *
 
 clean:
 	rm -f *.o $(EXEC) *~ cppcheck_report.txt

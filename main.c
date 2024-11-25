@@ -1,167 +1,180 @@
 /**
- * main.c
+ * @file main.c
+ * @brief Main file for the project.
  *
- * Ce fichier contient la fonction main() du programme de manipulation
- * de fichiers pnm.
+ * This file contains the main function of the project.
  *
- * @author: SALEHIKATOZI SeyedPouria S192865
+ * @author: KATOUZIAN Pouria S192865
  * @date: 10/02/2021
  * @projet: INFO0030 Projet 1
  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <getopt.h>
 #include <string.h>
-
+#include <assert.h>
+#include <getopt.h>
+#include <stdbool.h>
 #include "pnm.h"
 
-/*
- *convert_lowercase
- * @pre: string != NULL
- * @post: convert uppercase string to lowerercase string
- */
-static char* convert_lowercase(char *string){
-   assert(string != NULL);
+static char *convert_to_lowercases(const char *string)
+{
+    if (!string)
+    {
+        fprintf(stderr, "Error: String is NULL\n");
+        return NULL;
+    }
 
-   unsigned int i = 0;
-   char str[3];
-   while(string[i] != '\0'){
-     char character = string[i];
-     str[i] = tolower(character);
-     i++;
-   }
-   return (char *)strcpy(string , str);
+    char *lowercase = malloc(strlen(string) + 1); // +1 for the null terminator
+    if (!lowercase)
+    {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        return NULL;
+    }
+
+    for (unsigned int i = 0; i < strlen(string); i++)
+    {
+        lowercase[i] = tolower(string[i]);
+    }
+
+    lowercase[strlen(string)] = '\0';
+    return lowercase;
 }
 
-/*
- *detect_fileName
- * @pre: string != NULL
- * @post: detect if filename doesn't contain any wierd character such as ! ? / \ <>
- */
-static int detect_fileName(char *string){
-   assert(string != NULL);
-
-   const char forbidenChar[] = "<>/:;<>!|{}[]()^!'\"?";
-   unsigned int i = 0;
-   while(forbidenChar[i] != '\0'){
-       if(strchr(string, forbidenChar[i])){
-           return -1;
-       }
-       i++;
-   }
-   return 0;
+static int detect_filename(const char *filename)
+{
+    assert(filename != NULL);
+    const char forbidden[] = "<>/:;<>!|{}[]()^!'\"?";
+    for (unsigned int i = 0; i < strlen(forbidden); i++)
+    {
+        if (strchr(filename, forbidden[i]))
+        {
+            fprintf(stderr, "Error: Forbidden character in filename\n");
+            return -1;
+        }
+    }
+    return 0;
 }
 
-/*
- * check_inputeFormat
- * @pre: string != NULL
- * @post: check if format given by user is pgm , pbm or ppm
- */
-static int check_inputeFormat(char *string){
-   assert(string != NULL);
-
-   if((!strcmp(string, "pbm")) || (!strcmp(string, "pgm")) || (!strcmp(string, "ppm"))){
-     return 0;
-   }else{
-     return -2;
-   }
+static int check_inputeFormat(const char *string)
+{
+    assert(string != NULL);
+    return (!strcmp(string, "pbm") || !strcmp(string, "pgm") || !strcmp(string, "ppm")) ? 0 : -2;
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
+    char *optstring = "hf:i:o:";
+    char *input = NULL;
+    char *output = NULL;
+    char *fileFormat = NULL;
+    int option;
+    bool flag = false;
 
-   char *optstring = "hf:i:o:";
-   char *fileFormat;
-   char *inputFile;
-   char *outputFile;
-   int  val;
-
-   while((val = getopt(argc, argv, optstring)) != EOF){
-      if(argc < 8){
-         switch(val){
-            case 'h':
-               printf("Enter: -f <fileFormat> -i <inpute> -o <outpute>\n\n");
-               break;
-            case 'f':
-                 fileFormat = optarg;
-                 if(optarg != NULL){
-                 printf("You entred : %s", fileFormat);
-              }else if(fileFormat == NULL){
-                 printf("Empty or wrong format\n");
-                 exit(-2);
-               }
-               break;
-            case 'i':
-                inputFile = optarg;
-                if(optarg != NULL){
-                  printf("   %s", inputFile);
-               }else if(inputFile == NULL){
-                  printf("Empty -i inpute[filename]\n");
-                  exit(-2);
-               }
-               break;
-            case 'o':
-                outputFile = optarg;
-                if(optarg != NULL){
-                  printf("  %s\n", outputFile);
-               }else if(outputFile == NULL){
-                  printf("Empty -o outpute[Filename]\n");
-                  exit(-2);
-               }
-               break;
-             default:
-               printf("\nError : Entered Command not defined \n");
-               break;
-         }
-      }
-      else{
-         printf("\n\nToo Many Argument\n\n");
-         exit(-2);
-      }
-   }
-
-   PNM *image;
-   if((inputFile && fileFormat)){
-      if(strlen(fileFormat) != 3){
-        printf("Error : Format must contain only 3 character\n");
-        return -2;
-      }
-      convert_lowercase(fileFormat);
-      int formatValidation = check_inputeFormat(fileFormat);
-      if(formatValidation != 0){
-        return -2;
-      }
-      int fileValidation = detect_fileName(outputFile);
-      if(fileValidation != 0){
-        printf("Invalide Outpute File Name \n");
-        return -1;
-      }
-      char *checkIn = (inputFile + strlen(inputFile) - strlen(fileFormat)); //getting inpute file format entered by user
-      char *checkOut = (outputFile + strlen(outputFile) - strlen(fileFormat)); //getting outpute file format entred by user
-      unsigned int checkInpute = strcmp(checkIn, fileFormat); //comparing image file format with format inpute
-      unsigned int checkOutpute = strcmp(checkOut, fileFormat);// comparing outpute image format with format inpute
-         if((checkInpute == 0) && (checkOutpute == 0)){
-            int check_load = load_pnm(&image, inputFile);
-            if(check_load == -1 || check_load == -2 || check_load == -3){
-               printf("\nError \n");
-               return -1;
+    while ((option = getopt(argc, argv, optstring)) != -1)
+    {
+        switch (option)
+        {
+        case 'h':
+            fprintf(stdout, "Usage: %s -f <format> -i <input> -o <output>\n", argv[0]);
+            flag = true;
+            break;
+        case 'f':
+            fileFormat = convert_to_lowercases(optarg);
+            if (check_inputeFormat(fileFormat) == -2)
+            {
+                fprintf(stderr, "Error: Invalid format\n");
+                free(fileFormat);
+                return -2;
             }
-            int check_write = write_pnm(image, outputFile);
-            if(check_write == -1 || check_write == -2 || check_write == -3){
-              printf("\nError \n");
-              return -1;
+            break;
+        case 'i':
+            input = optarg;
+            if (detect_filename(input) == -1)
+            {
+                free(fileFormat);
+                return -2;
             }
-         }
-         else{
-            printf("\nWORNG File Format\n");
+            break;
+        case 'o':
+            output = optarg;
+            if (output == NULL)
+            {
+                fprintf(stderr, "Error: Invalid output\n");
+                free(fileFormat);
+                return -2;
+            }
+            else
+            {
+                fprintf(stdout, "Output file: %s\n", output);
+            }
+            break;
+        default:
+            fprintf(stderr, "Error: Invalid option\n");
+            free(fileFormat);
             return -2;
-         }
-   }
+        }
+    }
+
+    if ((input == NULL || output == NULL || fileFormat == NULL) && flag == false)
+    {
+        fprintf(stderr, "Error: Missing required arguments (-f, -i, -o).\n");
+        free(fileFormat);
+        return -2;
+    }
+    else if (flag == true)
+    {
+        free(fileFormat);
+        return -2;
+    }
+
+    if (strlen(fileFormat) > strlen(input) || strlen(fileFormat) > strlen(output))
+    {
+        fprintf(stderr, "Error: File format length exceeds file name length.\n");
+        free(fileFormat);
+        return -2;
+    }
+
+    char *checkInput = input + strlen(input) - strlen(fileFormat);
+    char *checkOutput = output + strlen(output) - strlen(fileFormat);
+
+    PNM *image = NULL;
+    if (!strcmp(checkInput, fileFormat) && !strcmp(checkOutput, fileFormat))
+    {
+        if (load_pnm(&image, input) == 0)
+        {
+            fprintf(stdout, "Image loaded successfully\n");
+
+            if (write_pnm(image, output) == 0)
+            {
+                fprintf(stdout, "Image written successfully\n");
+            }
+            else
+            {
+                fprintf(stderr, "Error: Image writing failed\n");
+                free_pnm(image);
+                free(fileFormat);
+                return -2;
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Error: Image loading failed\n");
+            free(fileFormat);
+            return -2;
+        }
+    }
+    else
+    {
+        fprintf(stderr, "Error: Mismatched file formats\n");
+        free(fileFormat);
+        return -2;
+    }
 
     free_pnm(image);
-    printf("\nEnd of program\n");
-   return 0;
+    free(fileFormat);
+    fprintf(stdout, "Program executed successfully\n");
+    return 0;
 }
