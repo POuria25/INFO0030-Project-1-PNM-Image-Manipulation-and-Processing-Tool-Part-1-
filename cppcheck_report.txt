@@ -1,0 +1,36 @@
+[1mmain.c:164:14: [31merror:[39m Uninitialized variable: image [uninitvar][0m
+    free_pnm(image);
+             ^
+[1mmain.c:127:8: [31merror:[39m Uninitialized variable: inputFile [uninitvar][0m
+   if((inputFile && fileFormat)){
+       ^
+[1mmain.c:82:48: [2mnote:[0m Assuming condition is false
+   while((val = getopt(argc, argv, optstring)) != EOF){
+                                               ^
+[1mmain.c:127:8: [2mnote:[0m Uninitialized variable: inputFile
+   if((inputFile && fileFormat)){
+       ^
+[1mmain.c:164:14: [31merror:[39m Uninitialized variable: image [uninitvar][0m
+    free_pnm(image);
+             ^
+[1mmain.c:127:18: [2mnote:[0m Assuming condition is false
+   if((inputFile && fileFormat)){
+                 ^
+[1mmain.c:164:14: [2mnote:[0m Uninitialized variable: image
+    free_pnm(image);
+             ^
+[1mpnm.c:218:7: [31merror:[39m Memory leak: ptr [memleak][0m
+      return -3;
+      ^
+[1mpnm.c:218:7: [31merror:[39m Resource leak: opf [resourceLeak][0m
+      return -3;
+      ^
+[1mpnm.c:225:6: [31merror:[39m Resource leak: opf [resourceLeak][0m
+     return -3;
+     ^
+[1mpnm.c:230:6: [31merror:[39m Memory leak: ptr [memleak][0m
+     return -3;
+     ^
+[1mpnm.c:237:9: [31merror:[39m Memory leak: ptr [memleak][0m
+        return -3;
+        ^
