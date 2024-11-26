@@ -4,7 +4,7 @@
  * @brief Manipulation d'images PNM
  * @author: KATOUZIAN Pouria S192865
  * @date: 10/02/2021
- * @projet: INFO0030 Projet 1 
+ * @projet: INFO0030 Projet 1
  *
  */
 
@@ -153,6 +153,10 @@ static unsigned int **creat_matrix(unsigned int row, unsigned int column, unsign
             free(matrix);
             return NULL;
         }
+        for (unsigned int j = 0; j < column; j++)
+        {
+            matrix[i][j] = 0;
+        }
     }
     return matrix;
 }
@@ -226,7 +230,6 @@ static int print_matrix(PNM *image, FILE *file)
     return 0;
 }
 
-
 int load_pnm(PNM **image, char *filename)
 {
     assert(image != NULL && filename != NULL);
@@ -259,17 +262,19 @@ int load_pnm(PNM **image, char *filename)
         free(*image);
         return -3;
     }
-    if((*image)->imageFormat == 1){
+    if ((*image)->imageFormat == 1)
+    {
         remove_comments(file);
     }
     if (fscanf(file, "%u %u\n", &(*image)->column, &(*image)->raw) != 2)
     {
         fprintf(stderr, "Error Reading Column and Row\n");
         fclose(file);
-        free(*image);
+        free_pnm(*image);
         return -3;
     }
-    if((*image)->imageFormat == 2 || (*image)->imageFormat == 3){
+    if ((*image)->imageFormat == 2 || (*image)->imageFormat == 3)
+    {
         remove_comments(file);
     }
     fprintf(stdout, "Column: %u\nRow: %u\n", (*image)->column, (*image)->raw);
@@ -289,8 +294,11 @@ int load_pnm(PNM **image, char *filename)
             return -3;
         }
     }
-    (*image)->matrix = creat_matrix((*image)->raw, (*image)->column, (*image)->imageFormat);
-    if (!(*image)->matrix)
+    if ((*image)->raw > 0 && (*image)->column > 0 && !(*image)->matrix && (format == 0))
+    {
+        (*image)->matrix = creat_matrix((*image)->raw, (*image)->column, (*image)->imageFormat);
+    }
+    else
     {
         fclose(file);
         free(*image);
@@ -299,7 +307,7 @@ int load_pnm(PNM **image, char *filename)
     if (scan_matrix(*image, file) == -1)
     {
         fclose(file);
-        free(*image);
+        free_pnm(*image);
         return -3;
     }
     fclose(file);
